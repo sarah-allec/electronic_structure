@@ -80,7 +80,7 @@ fig.tight_layout()
 fig.savefig('vh_z',dpi=600)
 
 # Compute work function phi
-v_h_filename = 'hartree_z.dat'
+v_h_filename = 'vh_z.dat'
 v_h_df = pd.read_csv(v_h_filename, header=None)
 z = v_h_df.iloc[:,0].to_list()
 v_h = v_h_df.iloc[:,1].to_list()
