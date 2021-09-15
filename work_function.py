@@ -7,10 +7,14 @@ from matplotlib import axes
 
 flatten = lambda t: [item for sublist in t for item in sublist]
 
-#USAGE: python [cube_file] [e_fermi] [a] [b]
+# USAGE: python [cube_file] [e_fermi] [a] [b]
+
+# Conversion factors
+au2ev = 27.211386245989
+bohr2ang = 0.529177
 
 filename = sys.argv[1]
-e_fermi = float(sys.argv[2])*27.211386245989
+e_fermi = float(sys.argv[2])*au2ev
 a = float(sys.argv[3])
 b = float(sys.argv[4])
 
@@ -34,9 +38,9 @@ n_vox_z, z1, z2, z3 = data[5].split()
 n_vox_z = int(n_vox_z)
 z_axis = [float(z1), float(z2), float(z3)]
 
-x_grid = 0.529177*np.arange(0, n_vox_x * x_axis[0], x_axis[0])
-y_grid = 0.529177*np.arange(0, n_vox_y * y_axis[1], y_axis[1])
-z_grid = 0.529177*np.arange(0, n_vox_z * z_axis[2], z_axis[2])
+x_grid = bohr2ang*np.arange(0, n_vox_x * x_axis[0], x_axis[0])
+y_grid = bohr2ang*np.arange(0, n_vox_y * y_axis[1], y_axis[1])
+z_grid = bohr2ang*np.arange(0, n_vox_z * z_axis[2], z_axis[2])
 
 # skip coords for now
 hart_start = n_atoms + 6
@@ -46,7 +50,7 @@ for d in data[hart_start:len(data)]:
     hartree.append( [ float(i) for i in dsplit ] )
 hartree = flatten(hartree)
 hartree = np.reshape(hartree, (n_vox_x, n_vox_y, n_vox_z))
-hartree_z = 27.2114*np.mean(hartree, (0,1))
+hartree_z = au2ev*np.mean(hartree, (0,1))
 pd.DataFrame(np.column_stack( (z_grid, hartree_z) ) ).to_csv('vh_z.dat',header = False, index = False)
 
 params = { 
