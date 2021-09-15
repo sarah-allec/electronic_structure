@@ -13,15 +13,18 @@ flatten = lambda t: [item for sublist in t for item in sublist]
 au2ev = 27.211386245989
 bohr2ang = 0.529177
 
+# Read in command line arguments
 filename = sys.argv[1]
 e_fermi = float(sys.argv[2])*au2ev
 a = float(sys.argv[3])
 b = float(sys.argv[4])
 
+# Read in data from cube file containing potential
 file = open(filename)
 data = file.readlines()
 file.close()
 
+# Get grid info
 n_atoms, x_origin, y_origin, z_origin = data[2].split()
 n_atoms = int(n_atoms)
 origin = [float(x_origin), float(y_origin), float(z_origin)]
@@ -42,7 +45,7 @@ x_grid = bohr2ang*np.arange(0, n_vox_x * x_axis[0], x_axis[0])
 y_grid = bohr2ang*np.arange(0, n_vox_y * y_axis[1], y_axis[1])
 z_grid = bohr2ang*np.arange(0, n_vox_z * z_axis[2], z_axis[2])
 
-# skip coords for now
+# Read potential into array - TO DO: use pandas?
 hart_start = n_atoms + 6
 hartree = []
 for d in data[hart_start:len(data)]:
@@ -50,9 +53,12 @@ for d in data[hart_start:len(data)]:
     hartree.append( [ float(i) for i in dsplit ] )
 hartree = flatten(hartree)
 hartree = np.reshape(hartree, (n_vox_x, n_vox_y, n_vox_z))
+
+# Average over z-direction and save to file
 hartree_z = au2ev*np.mean(hartree, (0,1))
 pd.DataFrame(np.column_stack( (z_grid, hartree_z) ) ).to_csv('vh_z.dat',header = False, index = False)
 
+# Plot potential
 params = { 
     'font.family': 'sans-serif',
     'font.serif': 'Arial Narrow',
@@ -73,6 +79,7 @@ ax.set_ylabel(r'$V_H$ (eV)')
 fig.tight_layout()
 fig.savefig('vh_z',dpi=600)
 
+# Compute work function phi
 v_h_filename = 'hartree_z.dat'
 v_h_df = pd.read_csv(v_h_filename, header=None)
 z = v_h_df.iloc[:,0].to_list()
